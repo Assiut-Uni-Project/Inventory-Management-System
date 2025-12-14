@@ -79,11 +79,11 @@ IMS is ideal for:
 
 ## 🧰 Tech Stack
 
-| Component   | Technology | Why It’s Used |
-|-------------|------------|----------------|
-| Frontend    | Tkinter    | Simple, built-in Python GUI |
-| Backend     | Python     | Clean, powerful, and flexible |
-| Database    | SQLite3    | Lightweight and reliable |
-| Language    | Python     | Great for both GUI and logic |
+| Component   | Technology        | Why It’s Used                 |
+|-------------|-------------------|-------------------------------|
+| Frontend    | Custom Tkinter    | Simple, built-in Python GUI   |
+| Backend     | Python            | Clean, powerful, and flexible |
+| Database    | SQLite3           | Lightweight and reliable      |
+| Language    | Python            | Great for both GUI and logic  |
 
 ---

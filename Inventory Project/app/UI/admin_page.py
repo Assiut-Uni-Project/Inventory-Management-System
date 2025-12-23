@@ -95,15 +95,9 @@ class AdminPage(ctk.CTkFrame):
         # Dictionary to hold entries
         self.entries = {}
         labels = ["Barcode", "Name", "Category", "Price", "Qty", "Image"]
-        for i, lbl in enumerate(labels):
-            ctk.CTkLabel(grid, text=lbl, font=("Segoe UI", 12, "bold"), text_color="#555").grid(row=0, column=i, sticky="w", padx=5)
-            e = ctk.CTkEntry(grid, height=35, corner_radius=10, border_color="#D0D0D0", fg_color="white", text_color="black")
-            e.grid(row=1, column=i, sticky="ew", padx=5, pady=(5, 0))
-            self.entries[lbl.lower()] = e # Save to dictionary
-            
-            if lbl == "Image":
-                ctk.CTkButton(grid, text="Browse", width=70, height=35, corner_radius=10, 
-                              fg_color="#3B8ED0", command=self.browse_img).grid(row=1, column=6, padx=5, pady=(22, 0))
+#
+
+#
         
         grid.grid_columnconfigure((0,1,2,3,4,5), weight=1)
 
@@ -148,10 +142,9 @@ class AdminPage(ctk.CTkFrame):
               messagebox.showinfo("Success",return_string)
             else:
              messagebox.showerror("Error", return_string)
+#
 
-    def browse_img(self):
-        p = filedialog.askopenfilename()
-        if p: self.entries["image"].delete(0,"end"); self.entries["image"].insert(0, p)
+#
 
     def fill_form(self, item):
         pid, bc, nm, cat, pr, qt, alert_status , im = item
@@ -350,3 +343,4 @@ class AdminPage(ctk.CTkFrame):
 
             
         
+

@@ -1,0 +1,23 @@
+requirments before turning on the app!
+
+1- you must install python,xampp and some python libs:
+
+
+pip install customtkinter
+
+pip install mysql-connector-python
+
+pip install google-auth
+pip install google-auth-oauthlib
+pip install google-api-python-client
+
+pip install bcrypt
+
+
+pip install python-barcode
+pip install pyzbar
+
+
+
+1- you must import the "inventory_db.sql" using xampp and turn on mysql and apache (you import the db from http://localhost/phpmyadmin/ )
+

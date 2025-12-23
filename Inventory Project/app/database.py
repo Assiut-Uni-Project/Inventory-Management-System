@@ -193,9 +193,6 @@ def item_price(item_name:str)->float:
 #function to search items
 ##################################################################################
 def search_item(item_name:str)->list:
-
-    print("search_item called with:", repr(item_name))
-
     #start connection
     connection= None
     cr= None
@@ -234,3 +231,4 @@ def scan_item(barcode: str) -> tuple[bool, list | str]:
     finally:
             conector.close_connection(connection)
 ##################################################################################
+

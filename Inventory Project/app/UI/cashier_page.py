@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, simpledialog
 from app.UI.helpers import load_items_to_frame
 from app.database import admin_backend, add_item_to_cart, remove_item_from_cart, calculate_total
-from app.database import item_price, get_cart_total
+from app.database import item_price, get_cart_total,scan_item
 from tkinter import messagebox, filedialog
 from app.barcode.barcode_manager import read_barcode_from_image
 
@@ -52,7 +52,7 @@ class CashierPage(ctk.CTkFrame):
         
 
         # scan Button
-        ctk.CTkButton(head, text="📷 Scan Item",fg_color="#27AE60" ,command=lambda: scan_item()).pack(side = "left",pady=10 ,padx=(50,0))
+        ctk.CTkButton(head, text="📷 Scan Item",fg_color="#27AE60" ,command=lambda: scan_item_button()).pack(side = "left",pady=10 ,padx=(50,0))
         
         def on_search():
             self.search_string = self.search_entry.get().strip()
@@ -68,7 +68,7 @@ class CashierPage(ctk.CTkFrame):
         
         
 
-        def scan_item():
+        def scan_item_button():
             image_path = filedialog.askopenfilename(title="Select Barcode Image",
                                          filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp")])
             if not image_path:
@@ -78,14 +78,14 @@ class CashierPage(ctk.CTkFrame):
             if not barcodes:
                 messagebox.showerror("Error", "No barcode found in the image.")
                 return
+            state , item = scan_item(barcodes[0]) 
+            if state:
+                self.add_item_popup(item)
+            else:
+                messagebox.showerror("Error", "Item not found.")
+
             
-            # Fetch item details from database using the barcode
-            # item = admin_backend.get_product_by_barcode(barcodes[0])
-            # if not item:
-            #     messagebox.showerror("Error", f"No item found with barcode: {barcodes[0]}")
-            #     return
             
-            # self.add_item_popup(item)
 
 
 
@@ -148,8 +148,6 @@ class CashierPage(ctk.CTkFrame):
     def remove_item(self, item_name):
         """Removes item from cart using database logic."""
         if item_name in self.cart:
-            # Backend function expects quantity to remove. 
-            # We remove ALL of it to match the "X" button behavior.
             qty_to_remove = self.cart[item_name]
             self.cart = remove_item_from_cart(self.cart, item_name, qty_to_remove)
             self.update_cart_display()

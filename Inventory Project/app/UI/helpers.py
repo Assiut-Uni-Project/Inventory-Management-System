@@ -50,18 +50,9 @@ def load_items_to_frame(target_frame, is_admin_view=False, on_click_callback=Non
         card.grid_columnconfigure(0, weight=0) # Icon column
         card.grid_columnconfigure(1, weight=1) # Text column
 
-        # Image
-        try:
-            if img_path and os.path.exists(img_path):
-                pil_img = Image.open(img_path)
-                my_image = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(60, 60))
-                lbl_icon = ctk.CTkLabel(card, text="", image=my_image)
-            else:
-                lbl_icon = ctk.CTkLabel(card, text="📦", font=("Arial", 40), text_color="white")
-        except Exception:
-            lbl_icon = ctk.CTkLabel(card, text="📦", font=("Arial", 40), text_color="white")
-            
-        lbl_icon.grid(row=0, column=0, rowspan=2, padx=(15, 5), pady=10)
+#
+
+#
 
         #Text 
         
@@ -99,3 +90,4 @@ def load_items_to_frame(target_frame, is_admin_view=False, on_click_callback=Non
                 w.bind("<Enter>", on_enter)
                 w.bind("<Leave>", on_leave)
                 w.bind("<Button-1>", on_click_handler)
+

@@ -85,17 +85,31 @@ class Admin:
 # Initialize the backend instance
 admin_backend = Admin()
 
-# Function to add a new user
 
-def add_user(username: str, password: str, role: str) -> None:
+#####################################################################################
+# Function to add a new user
+#####################################################################################
+#####################################################################################
+    
+def add_user(username: str, password: str, role: str) -> tuple[bool, str]:
     #input validation 
     if not username or not password or not role:
-        raise ValueError("Username, password, and role cannot be empty.")
+        return False, "Username, password, and role cannot be empty."
     if role not in ['admin', 'cashier']:
-        raise ValueError("Role must be either 'admin' or 'user'.")
-    if not username.isalpha() :
-        raise ValueError("Username must contain only alphabetic characters.")
-
+        return False, "Role must be either 'admin' or 'cashier'."
+    if not username.isalnum() and '_' not in username:
+        return False, "Username contains invalid characters."
+    # Password complexity checks
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not any(char.isdigit() for char in password):
+        return False, "Password must contain at least one digit."
+    if not any(char.isupper() for char in password):
+        return False, "Password must contain at least one uppercase letter."
+    if not any(char.islower() for char in password):
+        return False, "Password must contain at least one lowercase letter."
+    if not any(char in '!@#$%^&*()-_=+[]{}|;:,.<>?/' for char in password):
+        return False, "Password must contain at least one special character."
     #store data in database
     hashed_password = hash_password(password)
     connect= None
@@ -108,37 +122,34 @@ def add_user(username: str, password: str, role: str) -> None:
         cr.execute(check_query, (username,))  
         existing_user = cr.fetchone() 
         if existing_user:
-            raise ValueError("Username already exists.")
-        
+            return False, "Username already exists."
+        # Insert new user
         query = "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)"
         cr.execute(query, (username, hashed_password, role))
         conector.commit_changes(connect)
         conector.close_connection(connect)
-    #just raise the exception for error 
-    except ValueError as ve:
-        raise ve
-    except Exception as e:
+        return True, "User added successfully."
+    # Handle any database errors
+    except Error as e:
         conector.rollback_changes(connect)
-        raise e
+        return False, f"Failed to add user: {e}"
     finally:
         conector.close_connection(connect)
-
-          
 
 #####################################################################################
 
 #function to change user password
 #####################################################################################
-
-def change_password (username: str, old_password:str,new_password: str) -> None:
+#####################################################################################
+def change_password (username: str, old_password:str,new_password: str) -> tuple[bool, str]:
     #input validation
     print(f"Changing password for user: {username}")
     # Validate inputs
     if not username or not new_password or not old_password:
-        raise ValueError("Username , new password and old password cannot be empty.")
+        return False, "Username , new password and old password cannot be empty."
     if not username.isalnum() and '_' not in username:
-        raise ValueError("Username contains invalid characters.")
-    
+        return False, "Username contains invalid characters."
+
     connect=None
     cr=None
     try:
@@ -150,26 +161,39 @@ def change_password (username: str, old_password:str,new_password: str) -> None:
         result = cr.fetchone()
         #check if user exists and old password matches
         if not result:
-            raise ValueError("Username does not exist.")
+            return False, "User not found."
         if not compare(old_password, result[0]):
-                raise ValueError("Old password is incorrect.")
+            return False, "Old password is incorrect."
+        # check new password complexity
+        if len(new_password) < 8:   
+            return False, "Password must be at least 8 characters long."    
+        if not any(char.isdigit() for char in new_password):
+            return False, "Password must contain at least one digit."
+        if not any(char.isupper() for char in new_password):
+            return False, "Password must contain at least one uppercase letter."
+        if not any(char.islower() for char in new_password):
+            return False, "Password must contain at least one lowercase letter."
+        if not any(char in '!@#$%^&*()-_=+[]{}|;:,.<>?/' for char in new_password):
+            return False, "Password must contain at least one special character."
         #update password in database
+
         hashed_password = hash_password(new_password)
         query = "UPDATE users SET password = %s WHERE username = %s"
         cr.execute(query, (hashed_password, username))
         conector.commit_changes(connect)
         conector.close_connection(connect)
-    except Exception as e:
+        return True, "Password changed successfully."
+    except Error as e:
         if connect:
             conector.rollback_changes(connect)
-        raise e
+        return False, f"Failed to change password: {e}"
     finally:
         if connect:
             conector.close_connection(connect)
 
-
-
-##################################################################################
+######################################################################################
+#####################################################################################
+#####################################################################################
 
 
 
@@ -397,5 +421,6 @@ def scan_item(barcode: str) -> tuple[bool, list | str]:
     finally:
             conector.close_connection(connection)
 ##################################################################################
+
 
 

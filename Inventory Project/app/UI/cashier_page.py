@@ -45,7 +45,7 @@ class CashierPage(ctk.CTkFrame):
          #search button
         ctk.CTkButton(head, text="Search", width=80, fg_color="#2A2D2E", 
                         command=lambda: on_search()).pack( side="left", padx=(10,10))
-        ctk.CTkButton(head, text="Refresh Inventory", command=self.refresh).pack(side="right", pady=10)
+        ctk.CTkButton(head, text="⟳", width=40,text_color="#2A2D2E",command=self.refresh).pack(side="right", pady=10)        
 
         # scan Button
         ctk.CTkButton(head, text="📷 Scan Item",fg_color="#27AE60" ,command=lambda: scan_item_button()).pack(side = "left",pady=10 ,padx=(50,0))

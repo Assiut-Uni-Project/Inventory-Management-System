@@ -339,8 +339,8 @@ class AdminPage(ctk.CTkFrame):
         def restore():
             try:
                 gui_restore_by_index(options.index(backup_version.get()))
-                messagebox.showinfo("Success", "Backup Restored Successfully")
                 win.destroy()
+                messagebox.showinfo("Success", "Backup Restored Successfully")
                 self.refresh()
             except Exception as Err:
                 messagebox.showerror("Error", str(Err))

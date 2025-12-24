@@ -23,11 +23,7 @@ class CashierPage(ctk.CTkFrame):
         self.grid_columnconfigure(1, weight=1) # Main content expands
         self.grid_rowconfigure(0, weight=1)
 
-        # # --- Sidebar (Left) ---
-        # sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
-        # sidebar.grid(row=0, column=0, sticky="nsew") 
-        
-        # ctk.CTkLabel(sidebar, text="CASHIER", font=("Arial", 24, "bold")).pack(pady=30)
+
         
 
         content = ctk.CTkFrame(self, fg_color="transparent")
@@ -49,7 +45,7 @@ class CashierPage(ctk.CTkFrame):
          #search button
         ctk.CTkButton(head, text="Search", width=80, fg_color="#2A2D2E", 
                         command=lambda: on_search()).pack( side="left", padx=(10,10))
-        
+        ctk.CTkButton(head, text="Refresh Inventory", command=self.refresh).pack(side="right", pady=10)
 
         # scan Button
         ctk.CTkButton(head, text="📷 Scan Item",fg_color="#27AE60" ,command=lambda: scan_item_button()).pack(side = "left",pady=10 ,padx=(50,0))
@@ -94,7 +90,7 @@ class CashierPage(ctk.CTkFrame):
         self.grid_frame.pack(fill="both", expand=True)
 
         # Refresh Button
-        ctk.CTkButton(product_frame, text="Refresh Inventory", command=self.refresh).pack(pady=10)
+        
 
         cart_panel = ctk.CTkFrame(content, width=300, fg_color="#F0F0F0", corner_radius=10)
         cart_panel.pack(side="right", fill="y", padx=(10, 0))
@@ -144,6 +140,8 @@ class CashierPage(ctk.CTkFrame):
             messagebox.showerror("Error", str(e))
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
+
+    
 
     def remove_item(self, item_name):
         """Removes item from cart using database logic."""

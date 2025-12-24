@@ -1,12 +1,178 @@
 from app import conector
 import bcrypt  
 from mysql.connector import Error
+from app.barcode.barcode_manager import generate_barcode
 
 
-#####
+class Admin:
+    # Use the connector module for connections
+    def connect(self):
+        return conector.create_connection()
+
+    def get_category_id(self, category_name):
+        conn = self.connect()
+        if not conn: return None
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM categories WHERE name = %s", (category_name,))
+            res = cur.fetchone()
+            if res: return res[0]
+            else:
+                cur.execute("INSERT INTO categories (name) VALUES (%s)", (category_name,))
+                conn.commit(); return cur.lastrowid
+        except Error: return None
+        finally: conector.close_connection(conn)
+
+    def add_product(self, barcode, name, category_name, price, quantity, image_path):
+        generate_barcode(barcode)
+        conn = self.connect(); 
+        if not conn: return
+        try:
+            cur = conn.cursor()
+            cat_id = self.get_category_id(category_name)
+            query = "INSERT INTO products (barcode, name, category_id, supplier_id, price, quantity, image_path) VALUES (%s, %s, %s, 1, %s, %s, %s)"
+            cur.execute(query, (barcode, name, cat_id, price, quantity, image_path))
+            conn.commit()
+        except Error as e: raise e
+        finally: conector.close_connection(conn)
+        
+
+    def update_product(self, pid, name=None, cat=None, price=None, qty=None, img=None):
+        conn = self.connect(); 
+        if not conn: return
+        try:
+            cur = conn.cursor()
+            if name: cur.execute("UPDATE products SET name=%s WHERE id=%s", (name, pid))
+            if cat:
+                cid = self.get_category_id(cat)
+                cur.execute("UPDATE products SET category_id=%s WHERE id=%s", (cid, pid))
+            if price: cur.execute("UPDATE products SET price=%s WHERE id=%s", (price, pid))
+            if qty: cur.execute("UPDATE products SET quantity=%s WHERE id=%s", (qty, pid))
+            if img: cur.execute("UPDATE products SET image_path=%s WHERE id=%s", (img, pid))
+            conn.commit()
+        except Error as e: raise e
+        finally: conector.close_connection(conn)
+
+    def delete_product(self, pid):
+        conn = self.connect(); 
+        if not conn: return
+        try:
+            cur = conn.cursor(); cur.execute("DELETE FROM products WHERE id=%s", (pid,)); conn.commit()
+        except Error as e: raise e
+        finally: conector.close_connection(conn)
+    
+
+    def get_products(self):
+       conn = self.connect()
+       if not conn: return []
+
+       try:
+              cur = conn.cursor()
+              cur.execute("SELECT p.id, p.barcode, p.name, c.name AS category, p.price, p.quantity,p.alert_quantity, p.image_path FROM products p JOIN categories c ON p.category_id = c.id")
+              result=[]
+              for id, barcode, name, category, price, quantity,alert_quantity, image_path in cur.fetchall():
+                  if quantity <= alert_quantity:
+                      alert_status=True
+                  else:
+                        alert_status=False
+                  result.append((id, barcode, name, category, price, quantity,alert_status, image_path))
+                
+              return result
+       finally:
+           conector.close_connection(conn)
+
+#####################################################################################
+# Initialize the backend instance
+admin_backend = Admin()
+
+# Function to add a new user
+
+def add_user(username: str, password: str, role: str) -> None:
+    #input validation 
+    if not username or not password or not role:
+        raise ValueError("Username, password, and role cannot be empty.")
+    if role not in ['admin', 'cashier']:
+        raise ValueError("Role must be either 'admin' or 'user'.")
+    if not username.isalpha() :
+        raise ValueError("Username must contain only alphabetic characters.")
+
+    #store data in database
+    hashed_password = hash_password(password)
+    connect= None
+    cr= None
+    try:
+        connect= conector.create_connection()
+        cr=conector.get_cursor(connect)
+        #  Check if username already exists
+        check_query = "SELECT username FROM users WHERE username = %s"
+        cr.execute(check_query, (username,))  
+        existing_user = cr.fetchone() 
+        if existing_user:
+            raise ValueError("Username already exists.")
+        
+        query = "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)"
+        cr.execute(query, (username, hashed_password, role))
+        conector.commit_changes(connect)
+        conector.close_connection(connect)
+    #just raise the exception for error 
+    except ValueError as ve:
+        raise ve
+    except Exception as e:
+        conector.rollback_changes(connect)
+        raise e
+    finally:
+        conector.close_connection(connect)
+
+          
+
+#####################################################################################
+
+#function to change user password
+#####################################################################################
+
+def change_password (username: str, old_password:str,new_password: str) -> None:
+    #input validation
+    print(f"Changing password for user: {username}")
+    # Validate inputs
+    if not username or not new_password or not old_password:
+        raise ValueError("Username , new password and old password cannot be empty.")
+    if not username.isalnum() and '_' not in username:
+        raise ValueError("Username contains invalid characters.")
+    
+    connect=None
+    cr=None
+    try:
+        #check old password
+        connect= conector.create_connection()
+        cr=conector.get_cursor(connect)
+        query = "SELECT password FROM users WHERE username = %s"
+        cr.execute(query, (username,))
+        result = cr.fetchone()
+        #check if user exists and old password matches
+        if not result:
+            raise ValueError("Username does not exist.")
+        if not compare(old_password, result[0]):
+                raise ValueError("Old password is incorrect.")
+        #update password in database
+        hashed_password = hash_password(new_password)
+        query = "UPDATE users SET password = %s WHERE username = %s"
+        cr.execute(query, (hashed_password, username))
+        conector.commit_changes(connect)
+        conector.close_connection(connect)
+    except Exception as e:
+        if connect:
+            conector.rollback_changes(connect)
+        raise e
+    finally:
+        if connect:
+            conector.close_connection(connect)
 
 
-#####
+
+##################################################################################
+
+
+
 
 
 
@@ -231,4 +397,5 @@ def scan_item(barcode: str) -> tuple[bool, list | str]:
     finally:
             conector.close_connection(connection)
 ##################################################################################
+
 

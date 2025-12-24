@@ -38,7 +38,7 @@ class ClientPage(ctk.CTkFrame):
         table_header.pack(fill="x", padx=30, pady=(10, 0))
         
         # Refresh Button
-        ctk.CTkButton(table_header, text="Refresh ", command=self.refresh).pack(side = "left",pady=5, padx=10)        
+        ctk.CTkButton(head, text="⟳", width=40,text_color="#2A2D2E",command=self.refresh).pack(side="right", pady=10)        
 
 
 
